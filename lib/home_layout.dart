@@ -189,6 +189,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                   context: context,
                   initialTime: TimeOfDay.now()
               ).then((value){
+                print(value);
                 timeController.text = value!.format(context).toString();
               });
             },
