@@ -218,6 +218,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                   firstDate: DateTime.now(),
                   lastDate: DateTime.now().add(const Duration(days: 30))
               ).then((value){
+                print(value);
+
                 dateController.text = DateFormat.yMMMEd().format(value!);
               });
             },
