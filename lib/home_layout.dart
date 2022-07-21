@@ -12,6 +12,11 @@ class HomeLayout extends StatefulWidget {
   State<HomeLayout> createState() => _HomeLayoutState();
 }
 
+String? _title;
+String? _date;
+String? _time;
+String? _priority;
+
 class _HomeLayoutState extends State<HomeLayout> {
   int currentIndex = 0;
   List<Widget> pages = [
@@ -51,11 +56,15 @@ class _HomeLayoutState extends State<HomeLayout> {
         onPressed: () {
           if (isBottomSheet) {
             if(formKey.currentState!.validate()){
-              Navigator.pop(context);
-              isBottomSheet = false;
-              setState(() {
-                fabIcon = const Icon(Icons.add);
+              insertIntoDB(title: _title!, date: _date!, time: _time!, priority: _priority!)
+              .then((value) {
+                Navigator.pop(context);
+                isBottomSheet = false;
+                setState(() {
+                  fabIcon = const Icon(Icons.add);
+                });
               });
+
             }
 
           } else {
@@ -116,11 +125,11 @@ class _HomeLayoutState extends State<HomeLayout> {
     });
   }
 
-  void insertIntoDB() {
-    db.transaction((txn) {
+  Future insertIntoDB ({required String title, required String date, required String time, required String priority}) async{
+    return await db.transaction((txn) {
       txn
           .rawInsert(
-              'INSERT INTO tasks (title, date, time, status) VALUES ("FIRST", "TIME ONE", "DATE ONE", "STATUS ONE")')
+              'INSERT INTO tasks (title, date, time, priority, status) VALUES ("$title", "$date", "$time", "S$priority", "new")')
           .then((value) {
         print("$value inserted");
       }).catchError((error) {
@@ -134,13 +143,17 @@ class _HomeLayoutState extends State<HomeLayout> {
 
 //_______________BOTTOM SHEET_________________________
 class MyBottomSheet extends StatefulWidget {
-  const MyBottomSheet({Key? key}) : super(key: key);
+  const MyBottomSheet({
+    Key? key,
+  }) : super(key: key);
+
 
   @override
   State<MyBottomSheet> createState() => _MyBottomSheetState();
 }
 
 class _MyBottomSheetState extends State<MyBottomSheet> {
+
   bool isLow = false;
   bool isMedium = false;
   bool isHigh = false;
@@ -148,7 +161,6 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
   TextEditingController titleController = TextEditingController();
   TextEditingController timeController = TextEditingController();
   TextEditingController dateController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +187,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
               if(value!.isEmpty){
                 return "Title must not be Empty";
               }
+              _title = titleController.text;
               return null;
             },
           ),
@@ -191,6 +204,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
               ).then((value){
                 print(value);
                 timeController.text = value!.format(context).toString();
+                _time = timeController.text;
               });
             },
             decoration: const InputDecoration(
@@ -219,8 +233,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                   lastDate: DateTime.now().add(const Duration(days: 30))
               ).then((value){
                 print(value);
-
                 dateController.text = DateFormat.yMMMEd().format(value!);
+                _date = dateController.text;
               });
             },
             decoration: const InputDecoration(
@@ -263,6 +277,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                     isLow = isSelected;
                     isMedium = false;
                     isHigh = false;
+                    _priority = "Low";
+
                   });
                 },
                 selectedColor: Colors.blue,
@@ -283,6 +299,7 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                     isMedium = isSelected;
                     isLow = false;
                     isHigh = false;
+                    _priority = "Medium";
                   });
                 },
                 selectedColor: Colors.blue,
@@ -303,6 +320,8 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
                     isHigh = isSelected;
                     isMedium = false;
                     isLow = false;
+                    _priority = "High";
+
                   });
                 },
                 selectedColor: Colors.blue,
@@ -316,4 +335,6 @@ class _MyBottomSheetState extends State<MyBottomSheet> {
       ),
     );
   }
+
+
 }
