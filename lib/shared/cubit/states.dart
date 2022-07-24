@@ -12,4 +12,7 @@ class InsertDB extends AppStates {}
 
 class GetDB extends AppStates {}
 
+class UpdateDB extends AppStates {}
+
+
 class BottomSheetStates extends AppStates {}

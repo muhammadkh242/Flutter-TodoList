@@ -28,6 +28,12 @@ class AppCubit extends Cubit<AppStates> {
   bool isLow = false;
   late Database db;
   List<Map> tasksList = [];
+  List<Map> newTasks = [];
+
+  List<Map> doneTasks = [];
+
+  List<Map> archTasks = [];
+
   bool isBottomSheet = false;
   Icon fabIcon = const Icon(Icons.add);
 
@@ -55,11 +61,7 @@ class AppCubit extends Cubit<AppStates> {
       });
     }, onOpen: (db) {
       print("opened db");
-      getDataFromDB(db).then((value) {
-        print("my data $value");
-        tasksList = value;
-        emit(GetDB());
-      });
+      getDataFromDB(db);
     }).then((value) {
       db = value;
       emit(CreateDB());
@@ -79,22 +81,45 @@ class AppCubit extends Cubit<AppStates> {
       {
         print("$value inserted");
         emit(InsertDB());
-        getDataFromDB(db).then((value)
-        {
-          tasksList = value;
-          emit(GetDB());
-
-        });
+        getDataFromDB(db);
       }).catchError((error) {
         print(error.toString());
       });
     });
   }
 
-  Future<List<Map>> getDataFromDB(Database db) async {
-    return await db.rawQuery("SELECT * FROM tasks");
+  void getDataFromDB(Database db) async {
+    newTasks = [];
+    doneTasks = [];
+    archTasks = [];
+
+    await db.rawQuery("SELECT * FROM tasks").then((value)
+    {
+      tasksList = value;
+      value.forEach((element) {
+        if(element['status'] == "new") {
+          newTasks.add(element);
+        } else if (element['status'] == "done") {
+          doneTasks.add(element);
+        } else {
+          archTasks.add(element);
+        }
+
+      });
+      emit(GetDB());
+
+    });
   }
 
+  void updateDB({required String status, required int id}) async{
+    await db.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?',
+    [status, id]).then((value)
+    {
+      emit(UpdateDB());
+      getDataFromDB(db);
+    }
+    );
+  }
   void changeBottomSheetState({required bool isShow, required Icon icon}) {
     isBottomSheet = isShow;
     fabIcon = icon;
