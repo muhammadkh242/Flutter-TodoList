@@ -120,6 +120,16 @@ class AppCubit extends Cubit<AppStates> {
     }
     );
   }
+
+  void deleteDB({required int id}) async{
+    await db.rawUpdate('DELETE tasks WHERE id = ?',
+        [id]).then((value)
+    {
+      emit(DeleteDB());
+      getDataFromDB(db);
+    }
+    );
+  }
   void changeBottomSheetState({required bool isShow, required Icon icon}) {
     isBottomSheet = isShow;
     fabIcon = icon;

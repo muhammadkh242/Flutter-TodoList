@@ -14,5 +14,8 @@ class GetDB extends AppStates {}
 
 class UpdateDB extends AppStates {}
 
+class DeleteDB extends AppStates {}
+
+
 
 class BottomSheetStates extends AppStates {}
